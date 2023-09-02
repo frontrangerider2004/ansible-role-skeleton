@@ -1,0 +1,97 @@
+---
+name: AWS CloudFormation
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'
+  release:
+    types:
+      - created
+  workflow_dispatch:
+    inputs:
+      si_input_env_name:
+        description: Deployment Environment
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+        default: development
+      si_input_semver_tag:
+        description: Semantic Version (Optional for Rollback)
+        required: false
+
+jobs:
+  configure:
+    name: Configure Environment
+    runs-on: ubuntu-latest
+    outputs:
+      si_config: ${{ steps.configure.outputs.si_config }}
+      si_deployments: ${{ steps.configure.outputs.si_deployments }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Shared Actions
+        uses: ./.github/workflows/composites/shared-actions
+        with:
+          node-token: ${{ secrets.GH_NPM_READ_TOKEN }}
+          ssh-key: ${{ secrets.GH_SSH_PRIVATE_KEY }}
+
+      - name: Configure
+        id: configure
+        uses: ./.github/actions/composites/configure
+        with:
+          env-name: ${{ github.event.inputs.si_input_env_name }}
+          semver: ${{ github.event.inputs.si_input_semver_tag }}
+
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    needs:
+      - configure
+    strategy:
+      fail-fast: false
+      matrix:
+        si_deployment: ${{ fromJSON(needs.configure.outputs.si_deployments) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Shared Actions
+        uses: ./.github/workflows/composites/shared-actions
+        with:
+          config: ${{ toJSON(matrix.si_deployment) }}
+          node-token: ${{ secrets.GH_NPM_READ_TOKEN }}
+          ssh-key: ${{ secrets.GH_SSH_PRIVATE_KEY }}
+
+      - name: CloudFormation Environment Configuration
+        uses: ./.github/actions/composites/aws-cfn-config
+        with:
+          environment: ${{ toJSON(matrix.si_deployment) }}
+          node-token: ${{ secrets.GH_NPM_READ_TOKEN }}
+
+      - name: CloudFormation Deploy Artifacts
+        uses: ./.github/actions/composites/aws-cfn-deploy-artifacts
+        with:
+          environment: ${{ toJSON(matrix.si_deployment) }}
+
+      - name: CloudFormation Predeploy Stack
+        uses: ./.github/actions/composites/aws-cfn-predeploy-stack
+        with:
+          environment: ${{ toJSON(matrix.si_deployment) }}
+
+      - name: CloudFormation Deploy Stack
+        uses: ./.github/actions/composites/aws-cfn-deploy-stack
+        with:
+          environment: ${{ toJSON(matrix.si_deployment) }}
+
+      - name: CloudFormation Postdeploy Stack
+        uses: ./.github/actions/composites/aws-cfn-postdeploy-stack
+        with:
+          environment: ${{ toJSON(matrix.si_deployment) }}

@@ -1,0 +1,25 @@
+{
+  "name": "@simplesenseio/repository-template",
+  "version": "1.0.0",
+  "private": true,
+  "homepage": "https://github.com/simplesenseio/repository-template#readme",
+  "bugs": {
+    "url": "https://github.com/simplesenseio/repository-template/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simplesenseio/repository-template.git"
+  },
+  "scripts": {
+    "lint": "npm run lint:package-json && npm run lint:eslint",
+    "lint:eslint": "eslint --fix '**/*.{js,vue,yaml,yml}'",
+    "lint:package-json": "sort-package-json",
+    "shellcheck": "simple-shellcheck"
+  },
+  "devDependencies": {
+    "@simplesenseio/shellcheck": "^1.0.16",
+    "eslint": "^8.38.0",
+    "eslint-config-simplesense": "^3.0.0",
+    "sort-package-json": "^2.4.1"
+  }
+}

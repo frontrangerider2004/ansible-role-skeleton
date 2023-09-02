@@ -1,0 +1,7 @@
+.DS_Store
+
+# Build Artifacts
+cloudformation-packaged.yaml
+deploy-parameters-packaged.json
+coverage/
+node_modules/
