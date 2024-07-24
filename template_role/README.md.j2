@@ -1,0 +1,48 @@
+# {{ role_name }}
+
+This role installs and configures the {{ role_name }}. It does foo thing and supports bar awesomeness.
+
+## Requirements
+
+What things must be setup or in place before this role can be run. This is different than dependencies.
+
+## Exported Facts
+
+| Variable Name       | Description                                                                  |
+| ------------------- | ---------------------------------------------------------------------------- |
+| {{ role_name }}_foo | `containerd` socket that can be connected to using the `--address` cli flag. |
+
+## Defaults
+
+See the [defaults file](defaults/main.yaml) for more information
+
+| Variable Name       | Description                                                                  |
+| ------------------- | ---------------------------------------------------------------------------- |
+| {{ role_name }}_foo | `containerd` socket that can be connected to using the `--address` cli flag. |
+
+## Tags
+
+| Tag                  | Description                                                   |
+| -------------------- | ------------------------------------------------------------- |
+| {{ role_name }}      | selectively include or ignore the entire {{ role_name }} role |
+| {{ role_name }}::baz | selectively include or ignore the {{ role_name }} baz tasks   |
+
+### Tag Notes
+
+* Run `ansible-playbook playbook.yaml --list-tags` to see which tags are available at the playbook level.
+* Run `ansible-playbook playbook.yaml --tags my::tag --list-tasks` to see which tasks are included at the playbook level.
+
+## Dependencies
+
+See the [meta file](./meta/main.yaml)
+
+## Examples
+
+To include the role in a playbook:
+
+```yaml
+- name: My custom playbook
+  hosts: all
+  roles:
+    - {{ role_name | safe }}
+```
